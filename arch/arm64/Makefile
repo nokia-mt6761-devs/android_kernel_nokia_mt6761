@@ -144,9 +144,13 @@ Image.%: Image
 zinstall install:
 	$(Q)$(MAKE) $(build)=$(boot) $@
 
-%.dtb: scripts
-	$(Q)$(MAKE) $(build)=$(boot)/dts $(boot)/dts/$@
+# Define order-only-prerequisites to avoid races in sub make
+$(filter %/dtbo.img, $(MAKECMDGOALS)): %/dtbo.img: | $(filter %.dtbo %.dtb dtbs,$(MAKECMDGOALS))
+$(filter %.dtbo, $(MAKECMDGOALS)): %.dtbo: | $(filter %.dtb dtbs,$(MAKECMDGOALS))
 
+%.dtb %/dtbo.img %.dtbo: scripts
+	$(Q)$(MAKE) $(build)=$(dtstree)/$(@D) $(dtstree)/$@
+ 
 PHONY += dtbs dtbs_install
 
 dtbs: prepare scripts
