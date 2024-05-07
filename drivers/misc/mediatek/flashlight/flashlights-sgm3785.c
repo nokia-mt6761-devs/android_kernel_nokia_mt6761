@@ -34,7 +34,7 @@
 #include <mt-plat/mtk_pwm.h>
 
 /* define device tree */
-#define SGM3785_DTNAME "mediatek,flashlights_sgm3785"
+#define SGM3785_DTNAME "mediatek,flashlights_sgm3785_gpio"
 
 /* Device name */
 #define SGM3785_NAME "flashlights_sgm3785"
@@ -123,17 +123,17 @@ static int sgm3785_gpio_pinctrl_init(struct platform_device *pdev)
 
 	/* get enm gpio mode */
 	sgm3785_enm_gpio_h = pinctrl_lookup_state(sgm_gpio_pinctrl,
-		"flashlight_enm_high");
+		"flashlight_enm_gpio_high");
 	if (IS_ERR(sgm3785_enm_gpio_h)) {
-		pr_err("Failed to init flashlight_enm_high\n");
+		pr_err("Failed to init flashlight_enm_gpio_high\n");
 		ret = PTR_ERR(sgm3785_enm_gpio_h);
 		return ret;
 	}
 
 	sgm3785_enm_gpio_l = pinctrl_lookup_state(sgm_gpio_pinctrl,
-		"flashlight_enm_low");
+		"flashlight_enm_gpio_low");
 	if (IS_ERR(sgm3785_enm_gpio_l)) {
-		pr_err("Failed to init flashlight_enm_low\n");
+		pr_err("Failed to init flashlight_enm_gpio_low\n");
 		ret = PTR_ERR(sgm3785_enm_gpio_l);
 		return ret;
 	}
@@ -157,17 +157,17 @@ static int sgm3785_gpio_pinctrl_init(struct platform_device *pdev)
 
 	/* get enf gpio mode */
 	sgm3785_enf_gpio_h = pinctrl_lookup_state(sgm_gpio_pinctrl,
-		"flashlight_enf_high");
+		"flashlight_enf_gpio_high");
 	if (IS_ERR(sgm3785_enf_gpio_h)) {
-		pr_err("Failed to init flashlight_enf_high\n");
+		pr_err("Failed to init flashlight_enf_gpio_high\n");
 		ret = PTR_ERR(sgm3785_enf_gpio_h);
 		return ret;
 	}
 
 	sgm3785_enf_gpio_l = pinctrl_lookup_state(sgm_gpio_pinctrl,
-		"flashlight_enf_low");
+		"flashlight_enf_gpio_low");
 	if (IS_ERR(sgm3785_enf_gpio_l)) {
-		pr_err("Failed to init flashlight_enf_low\n");
+		pr_err("Failed to init flashlight_enf_gpio_low\n");
 		ret = PTR_ERR(sgm3785_enf_gpio_l);
 		return ret;
 	}
