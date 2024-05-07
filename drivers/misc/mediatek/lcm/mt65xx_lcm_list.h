@@ -311,6 +311,12 @@ extern struct LCM_DRIVER nt36672c_fhdp_dsi_vdo_auo_cphy_90hz_tianma_lcm_drv;
 
 extern struct LCM_DRIVER oppo_tianma_td4310_fhdp_dsi_vdo_rt5081_lcm_drv;
 
+/* Wasp specific LCM drivers */
+extern struct LCM_DRIVER jd9365_guoxian_video_lcm_drv;
+extern struct LCM_DRIVER jd9365_helitai_video_lcm_drv;
+extern struct LCM_DRIVER st7703_guoxian_video_lcm_drv;
+extern struct LCM_DRIVER st7703_helitai_video_lcm_drv;
+
 #ifdef BUILD_LK
 extern void mdelay(unsigned long msec);
 #endif
