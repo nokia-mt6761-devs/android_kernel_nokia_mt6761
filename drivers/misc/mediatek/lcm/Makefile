@@ -22,6 +22,8 @@ obj-$(CONFIG_MTK_LCM) += mt65xx_lcm_list.o        \
                          lcm_pmic.o               \
                          lcm_util.o
 
+obj-$(CONFIG_HQ_SET_LCD_BIAS) += lcm_bias.o
+
 LCM_LISTS := $(subst ",,$(CONFIG_CUSTOM_KERNEL_LCM))
 obj-$(CONFIG_MTK_LCM) += $(foreach LCM,$(LCM_LISTS),$(LCM)/)
 
