@@ -27,6 +27,11 @@
 #include "disp_helper.h"
 #include "ddp_reg.h"
 #include "lcm_drv.h"
+
+#ifdef CONFIG_HQ_SET_LCD_BIAS
+#include "lcm_bias.h"
+#endif
+
 #ifdef CONFIG_MTK_LEGACY
 #include <mach/mt_gpio.h>
 #include <cust_gpio_usage.h>
@@ -4761,6 +4766,13 @@ long lcd_enp_bias_setting(unsigned int value)
 	return ret;
 }
 
+#ifdef CONFIG_HQ_SET_LCD_BIAS
+void lcm_set_lcd_bias_en(unsigned int en, unsigned int seq, unsigned int value)
+{
+	lcd_bias_set_vspn(en, seq, value);
+}
+#endif
+
 int ddp_dsi_set_lcm_utils(enum DISP_MODULE_ENUM module,
 	struct LCM_DRIVER *lcm_drv)
 {
@@ -4893,6 +4905,10 @@ int ddp_dsi_set_lcm_utils(enum DISP_MODULE_ENUM module,
 #else
 	utils->set_gpio_lcd_enp_bias = lcd_enp_bias_setting;
 #endif
+#endif
+
+#ifdef CONFIG_HQ_SET_LCD_BIAS
+	utils->set_lcd_bias_vspn = lcm_set_lcd_bias_en;
 #endif
 
 	lcm_drv->set_util_funcs(utils);
