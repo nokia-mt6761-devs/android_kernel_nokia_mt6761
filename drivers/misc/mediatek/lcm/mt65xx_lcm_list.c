@@ -1193,6 +1193,20 @@ struct LCM_DRIVER *lcm_driver_list[] = {
 #if defined(OPPO_TIANMA_TD4310_FHDP_DSI_VDO_RT5081)
 	&oppo_tianma_td4310_fhdp_dsi_vdo_rt5081_lcm_drv,
 #endif
+
+/* Wasp specific LCM drivers */
+#if defined(JD9365_GUOXIAN_VIDEO)
+	&jd9365_guoxian_video_lcm_drv,
+#endif
+#if defined(JD9365_HELITAI_VIDEO)
+	&jd9365_helitai_video_lcm_drv,
+#endif
+#if defined(ST7703_GUOXIAN_VIDEO)
+	&st7703_guoxian_video_lcm_drv,
+#endif
+#if defined(ST7703_HELITAI_VIDEO)
+	&st7703_helitai_video_lcm_drv,
+#endif
 };
 
 unsigned char lcm_name_list[][128] = {
