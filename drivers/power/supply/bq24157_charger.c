@@ -424,6 +424,11 @@ static int bq2415x_parse_dt(struct device *dev, struct bq2415x *bq)
 
 	ret = of_property_read_string(np, "charger_name",
 					&bq->cfg.charger_name);
+	if (ret)
+		return ret;
+
+	ret = of_property_read_string(np, "bq2415x_alias_name",
+					&bq->chg_props.alias_name);
 
 	return ret;
 }
