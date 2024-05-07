@@ -17,6 +17,7 @@
 #include <linux/fs.h>
 
 #include "lcm_drv.h"
+#include "lcm_bias.h"
 
 #define LCM_LOGI(fmt, args...)  pr_debug("[KERNEL/"LOG_TAG"]"fmt, ##args)
 #define LCM_LOGD(fmt, args...)  pr_debug("[KERNEL/"LOG_TAG"]"fmt, ##args)
@@ -24,7 +25,7 @@
 static struct LCM_UTIL_FUNCS lcm_util;
 
 #define SET_RESET_PIN(v)	(lcm_util.set_reset_pin((v)))
-#define SET_GPIO_LCD_ENP_BIAS(v)	(lcm_util.set_gpio_lcd_enp_bias((v)))
+#define SET_LCD_BIAS_VSPN(en, seq, value)	(lcm_util.set_lcd_bias_vspn(en, seq, value))
 #define MDELAY(n)	(lcm_util.mdelay(n))
 #define UDELAY(n)	(lcm_util.udelay(n))
 
@@ -197,7 +198,7 @@ static void lcm_init(void)
   	MDELAY(1);
   	SET_RESET_PIN(1);
 	MDELAY(120);
-	SET_GPIO_LCD_ENP_BIAS(1);
+	SET_LCD_BIAS_VSPN(ON, VSP_FIRST_VSN_AFTER, 5500);
 	MDELAY(15);
 
 	push_table(NULL, init_setting_vdo, ARRAY_SIZE(init_setting_vdo), true);
@@ -214,7 +215,7 @@ static void lcm_suspend(void)
   	MDELAY(10);
 	SET_RESET_PIN(0);
 	MDELAY(120);
-	SET_GPIO_LCD_ENP_BIAS(0);
+	SET_LCD_BIAS_VSPN(OFF, VSN_FIRST_VSP_AFTER, 5500);
   	SET_RESET_PIN(0);
   	MDELAY(10);
 
