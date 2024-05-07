@@ -30,7 +30,7 @@
 #include <linux/debugfs.h>
 #include <linux/bitops.h>
 
-#include "mtk_charger_intf.h"
+#include "charger_class.h"
 #include "bq24157_reg.h"
 
 enum bq2415x_part_no {
@@ -44,7 +44,7 @@ struct bq2415x_config {
 
 	int ivl_mv;
 	int icl_ma;
-	
+
 	int safety_chg_mv;
 	int safety_chg_ma;
 
@@ -105,6 +105,7 @@ static int bq2415x_set_chargecurrent(struct charger_device *chg_dev, u32 curr);
 static int bq2415x_set_input_volt_limit(struct charger_device *chg_dev, u32 volt);
 static int bq2415x_set_input_current_limit(struct charger_device *chg_dev, u32 curr);
 
+static int bq2415x_charging(struct charger_device *chg_dev, bool enable);
 
 static int __bq2415x_read_reg(struct bq2415x *bq, u8 reg, u8 *data)
 {
@@ -835,17 +836,6 @@ static int bq2415x_get_input_current_limit(struct charger_device *chg_dev, u32 *
 	return ret;								 
 }
 
-static int bq2415x_reset_watchdog_timer(struct charger_device *chg_dev)
-{
-	struct bq2415x *bq = dev_get_drvdata(&chg_dev->dev);
-	
-	u8 val = BQ2415X_TMR_RST << BQ2415X_TMR_RST_SHIFT;
-
-	return bq2415x_update_bits(bq, BQ2415X_REG_00,
-				BQ2415X_TMR_RST_MASK, val);
-}
-
-
 static int bq2415x_enable_otg(struct charger_device *chg_dev, bool en)
 {
 	struct bq2415x *bq = dev_get_drvdata(&chg_dev->dev);
@@ -902,7 +892,6 @@ static struct charger_ops bq2415x_chg_ops = {
 	.send_ta_current_pattern = NULL,
 	.set_pe20_efficiency_table = NULL,
 	.send_ta20_current_pattern = NULL,
-	.set_ta20_reset = NULL,
 	.enable_cable_drop_comp = NULL,
 
 	/* ADC */
