@@ -288,6 +288,18 @@ enum LCM_DSI_PLL_CLOCK {
 	LCM_DSI_6589_PLL_CLOCK_520 = 50,
 };
 
+#ifdef CONFIG_HQ_SET_LCD_BIAS
+typedef enum {
+	OFF = 0,
+	ON = 1
+} LCD_BIAS_VSPN_POWER_ON_OFF;
+
+typedef enum {
+	VSP_FIRST_VSN_AFTER = 0,
+	VSN_FIRST_VSP_AFTER = 1
+} LCD_BIAS_VSPN_POWER_ON_SEQUENCE;
+#endif
+
 /* ------------------------------------------------------------------------- */
 
 struct LCM_DBI_DATA_FORMAT {
@@ -982,6 +994,9 @@ struct LCM_UTIL_FUNCS {
 	int (*set_gpio_mode)(unsigned int pin, unsigned int mode);
 	int (*set_gpio_dir)(unsigned int pin, unsigned int dir);
 	int (*set_gpio_pull_enable)(unsigned int pin, unsigned char pull_en);
+#ifdef CONFIG_HQ_SET_LCD_BIAS
+	void (*set_lcd_bias_vspn)(unsigned int en, unsigned int seq, unsigned int value);
+#endif
 	long (*set_gpio_lcd_enp_bias)(unsigned int value);
 	void (*dsi_set_cmdq_V11)(void *cmdq, unsigned int *pdata,
 			unsigned int queue_size, unsigned char force_update);
