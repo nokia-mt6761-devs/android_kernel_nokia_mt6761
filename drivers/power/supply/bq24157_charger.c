@@ -55,6 +55,8 @@ struct bq2415x_config {
 	int sensor_mohm;
 	
 	bool enable_term;
+
+	const char *charger_name;
 };
 
 
@@ -417,6 +419,11 @@ static int bq2415x_parse_dt(struct device *dev, struct bq2415x *bq)
 
 	ret = of_property_read_u32(np, "ti,bq2415x,term-current",
 					&bq->cfg.iterm_ma);
+	if (ret)
+		return ret;	
+
+	ret = of_property_read_string(np, "charger_name",
+					&bq->cfg.charger_name);
 
 	return ret;
 }
@@ -936,10 +943,11 @@ static int bq2415x_charger_probe(struct i2c_client *client,
 		return -ENODEV;
 	}
 
-		/* Register charger device */
+	/* Register charger device */
 	bq->chg_dev = charger_device_register(
-		"bq2515x", &client->dev, bq, &bq2415x_chg_ops,
-		&bq->chg_props);
+		bq->cfg.charger_name, &client->dev,
+			bq, &bq2415x_chg_ops, &bq->chg_props);
+
 	if (IS_ERR_OR_NULL(bq->chg_dev)) {
 		ret = PTR_ERR(bq->chg_dev);
 		goto err_0;
