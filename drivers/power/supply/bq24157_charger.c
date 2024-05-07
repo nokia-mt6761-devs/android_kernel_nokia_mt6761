@@ -412,6 +412,8 @@ static int bq2415x_parse_dt(struct device *dev, struct bq2415x *bq)
 	
 	ret = of_property_read_u32(np, "ti,bq2415x,vbatlow-volt",
 					&bq->cfg.batlow_mv);
+	if (ret)
+		return ret;
 
 	ret = of_property_read_u32(np, "ti,bq2415x,term-current",
 					&bq->cfg.iterm_ma);
