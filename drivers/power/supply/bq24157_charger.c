@@ -30,7 +30,7 @@
 #include <linux/debugfs.h>
 #include <linux/bitops.h>
 
-#include "charger_class.h"
+#include "mtk_charger.h"
 #include "bq24157_reg.h"
 
 enum bq2415x_part_no {
@@ -856,6 +856,26 @@ static int bq2415x_enable_otg(struct charger_device *chg_dev, bool en)
 }
 
 
+static int bq2415x_do_event(struct charger_device *chg_dev, u32 event,
+			    u32 args)
+{
+	if (chg_dev == NULL)
+		return -EINVAL;
+
+	switch (event) {
+	case EVENT_FULL:
+		charger_dev_notify(chg_dev, CHARGER_DEV_NOTIFY_EOC);
+		break;
+	case EVENT_RECHARGE:
+		charger_dev_notify(chg_dev, CHARGER_DEV_NOTIFY_RECHG);
+		break;
+	default:
+		break;
+	}
+
+	return 0;
+}
+
 
 static struct charger_ops bq2415x_chg_ops = {
 	/* Normal charging */
@@ -896,6 +916,9 @@ static struct charger_ops bq2415x_chg_ops = {
 
 	/* ADC */
 	.get_tchg_adc = NULL,
+
+	/* Event */
+	.event = bq2415x_do_event,
 };
 
 static int bq2415x_charger_probe(struct i2c_client *client,
