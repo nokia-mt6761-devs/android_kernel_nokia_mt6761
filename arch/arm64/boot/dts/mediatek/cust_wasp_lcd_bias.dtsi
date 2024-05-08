@@ -1,0 +1,65 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright (c) 2019 MediaTek Inc.
+ *
+ */
+
+&lcd_bias {
+	pinctrl-names = "default",
+			"lcd_bias_gpio_enp0",
+			"lcd_bias_gpio_enp1",
+			"lcd_bias_gpio_enn0",
+			"lcd_bias_gpio_enn1";
+
+	pinctrl-0 = <&lcd_bias_pins_default>;
+	pinctrl-1 = <&lcd_bias_pins_enp0>;
+	pinctrl-2 = <&lcd_bias_pins_enp1>;
+	pinctrl-3 = <&lcd_bias_pins_enn0>;
+	pinctrl-4 = <&lcd_bias_pins_enn1>;
+	status = "okay";
+};
+
+&i2c5 {
+	i2c_lcd_bias:i2c_lcd_bias@3e {
+		compatible = "mediatek,i2c_lcd_bias";
+		reg = <0x3e>;
+		status = "okay";
+	};
+};
+
+&pio {
+	lcd_bias_pins_enp0: lcd_bias_gpio_enp0 {
+		pins_cmd_dat {
+			pinmux = <PINMUX_GPIO16__FUNC_GPIO16>; /* 0x1000 >> 8 */
+			slew-rate = <1>;
+			output-low;
+		};
+	};
+
+	lcd_bias_pins_enp1: lcd_bias_gpio_enp1 {
+		pins_cmd_dat {
+			pinmux = <PINMUX_GPIO16__FUNC_GPIO16>; /* 0x1000 >> 8 */
+			slew-rate = <1>;
+			output-high;
+		};
+	};
+
+	lcd_bias_pins_enn0: lcd_bias_gpio_enn0 {
+		pins_cmd_dat {
+			pinmux = <PINMUX_GPIO14__FUNC_GPIO14>; /* 0xe00 >> 8 */
+			slew-rate = <1>;
+			output-low;
+		};
+	};
+
+	lcd_bias_pins_enn1: lcd_bias_gpio_enn1 {
+		pins_cmd_dat {
+			pinmux = <PINMUX_GPIO14__FUNC_GPIO14>; /* 0xe00 >> 8 */
+			slew-rate = <1>;
+			output-high;
+		};
+	};
+
+	lcd_bias_pins_default: lcd_bias_pins_default {
+	};
+};
