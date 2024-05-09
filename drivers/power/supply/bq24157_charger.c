@@ -927,7 +927,7 @@ static int bq2415x_charger_probe(struct i2c_client *client,
 
 	if (client->dev.of_node) {
 		ret = bq2415x_parse_dt(&client->dev, bq);
-		if (!ret) {
+		if (ret) {
 			pr_err("device tree parse error!\n");
 			return ret;
 		}
