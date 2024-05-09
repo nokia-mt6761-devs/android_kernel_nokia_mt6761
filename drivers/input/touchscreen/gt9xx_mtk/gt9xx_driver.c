@@ -17,7 +17,10 @@
 #include "tpd.h"
 #include "gt9xx_config.h"
 #include "include/tpd_gt9xx_common.h"
-#include "mt_boot_common.h"
+
+#ifdef FIXME
+#include "mtk_boot_common.h"
+#endif
 
 #ifdef CONFIG_GTP_PROXIMITY
 #include <hwmsensor.h>
@@ -35,6 +38,9 @@
 #include <linux/of_irq.h>
 #include <linux/proc_fs.h>	/*proc*/
 #include <linux/atomic.h>
+
+#include <uapi/linux/sched/types.h>
+#include <linux/sched.h>
 
 static int tpd_flag;
 int tpd_halt = 0;
@@ -2171,11 +2177,13 @@ static void tpd_down(s32 x, s32 y, s32 size, s32 id)
 	tpd_history_x = x;
 	tpd_history_y = y;
 
+#ifdef FIXME
 	/* MMProfileLogEx(MMP_TouchPanelEvent, MMProfileFlagPulse, 1, x+y); */
 	if (tpd_dts_data.use_tpd_button) {
 		if (FACTORY_BOOT == get_boot_mode() || RECOVERY_BOOT == get_boot_mode())
 			tpd_button(x, y, 1);
 	}
+#endif
 }
 
 static void tpd_up(s32 x, s32 y, s32 id)
@@ -2190,10 +2198,12 @@ static void tpd_up(s32 x, s32 y, s32 id)
 		tpd_history_y = 0;
 		/* MMProfileLogEx(MMP_TouchPanelEvent, MMProfileFlagPulse, 0, x+y); */
 
+#ifdef FIXME
 	if (tpd_dts_data.use_tpd_button) {
 		if (FACTORY_BOOT == get_boot_mode() || RECOVERY_BOOT == get_boot_mode())
 			tpd_button(x, y, 0);
 	}
+#endif
 }
 
 #ifdef CONFIG_GTP_CHARGER_DETECT
