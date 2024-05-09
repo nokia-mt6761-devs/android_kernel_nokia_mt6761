@@ -3796,6 +3796,7 @@ int primary_display_init(char *lcm_name, unsigned int lcm_fps,
 	int use_cmdq = disp_helper_get_option(DISP_OPT_USE_CMDQ);
 	struct disp_ddp_path_config *data_config;
 	struct ddp_io_golden_setting_arg gset_arg;
+	char *delimiter;
 	int i = 0;
 
 	DISPCHECK("primary_display_init begin lcm=%s, inited=%d\n",
@@ -3853,6 +3854,12 @@ int primary_display_init(char *lcm_name, unsigned int lcm_fps,
 	_primary_path_lock(__func__);
 
 	/* Part1: LCM */
+	delimiter = strchr(lcm_name, ':');
+	if (!delimiter) {
+		DISPERR("lcm_name does not have delimiter\n");
+	} else {
+		*delimiter = '\0';
+	}
 	pgc->plcm = disp_lcm_probe(lcm_name, LCM_INTERFACE_NOTDEFINED,
 		is_lcm_inited);
 	if (unlikely(pgc->plcm == NULL)) {
