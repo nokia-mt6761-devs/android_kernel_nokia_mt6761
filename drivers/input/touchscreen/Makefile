@@ -64,6 +64,9 @@ endif
 ifeq ($(CONFIG_TOUCHSCREEN_MTK_GT9XX_LM),y)
 obj-$(CONFIG_TOUCHSCREEN_MTK)		+= mediatek/
 endif
+ifeq ($(CONFIG_TOUCHSCREEN_MTK_GT9XX),y)
+obj-$(CONFIG_TOUCHSCREEN_MTK)		+= mediatek/
+endif
 ifeq ($(CONFIG_TOUCHSCREEN_GOODIX_BRL),y)
 obj-$(CONFIG_TOUCHSCREEN_MTK)		+= mediatek/
 endif
