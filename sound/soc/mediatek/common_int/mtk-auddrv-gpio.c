@@ -43,7 +43,15 @@
 #include <linux/of.h>
 #include <linux/of_fdt.h>
 
+#ifdef CONFIG_HQ_AUDIO_GPIO_EXTAMP_PA
+#include <linux/of_gpio.h>
+#endif
+
 struct pinctrl *pinctrlaud;
+
+#ifdef CONFIG_HQ_AUDIO_GPIO_EXTAMP_PA
+static int g_extamp_enable_pin;
+#endif
 
 #define MT6755_PIN 1
 
@@ -141,12 +149,28 @@ static unsigned int extbuck_fan53526_exist;
 
 static DEFINE_MUTEX(gpio_request_mutex);
 
-void AudDrv_GPIO_probe(void *dev)
+void AudDrv_GPIO_probe(struct device *dev)
 {
 	int ret;
 	int i = 0;
 
 	pr_debug("%s\n", __func__);
+
+#ifdef CONFIG_HQ_AUDIO_GPIO_EXTAMP_PA
+	g_extamp_enable_pin = of_get_named_gpio_flags(dev->of_node, "extamp_enable_pin",
+						      0, NULL);
+	if (gpio_is_valid(g_extamp_enable_pin)) {
+		ret = gpio_request(g_extamp_enable_pin, "extamp_enable_pin");
+		if (!ret) {
+			dev_info(dev, "request g_extamp_enable_pin success\n");
+		} else {
+			dev_err(dev, "request g_extamp_enable_pin fail\n");
+			g_extamp_enable_pin = -EINVAL;
+		}
+	} else {
+		dev_err(dev, "g_extamp_enable_pin is invalid\n");
+	}
+#endif
 
 	pinctrlaud = devm_pinctrl_get(dev);
 	if (IS_ERR(pinctrlaud)) {
@@ -460,8 +484,18 @@ int AudDrv_GPIO_EXTAMP_Select(int bEnable, int mode)
 #if MT6755_PIN
 	int extamp_mode;
 	int i;
+#ifdef CONFIG_HQ_AUDIO_GPIO_EXTAMP_PA
+	struct gpio_desc *desc = NULL;
+#endif
 
 	mutex_lock(&gpio_request_mutex);
+
+#ifdef CONFIG_HQ_AUDIO_GPIO_EXTAMP_PA
+	if (gpio_is_valid(g_extamp_enable_pin)) {
+		desc = gpio_to_desc(g_extamp_enable_pin);
+	}
+#endif
+
 	if (bEnable == 1) {
 		if (mode == 1)
 			extamp_mode = 1;
@@ -469,6 +503,20 @@ int AudDrv_GPIO_EXTAMP_Select(int bEnable, int mode)
 			extamp_mode = 2;
 		else
 			extamp_mode = 3; /* default mode is 3 */
+
+#ifdef CONFIG_HQ_AUDIO_GPIO_EXTAMP_PA
+		if (desc) {
+			gpiod_set_raw_value(desc, 1);
+			udelay(1);
+			gpiod_set_raw_value(desc, 0);
+			udelay(1100);
+
+			for (i = 0; i < extamp_mode; i++) {
+				gpiod_set_raw_value(desc, 0);
+				gpiod_set_raw_value(desc, 1);
+			}
+		}
+#endif
 
 		if (aud_gpios[GPIO_EXTAMP_HIGH].gpio_prepare) {
 			for (i = 0; i < extamp_mode; i++) {
@@ -487,6 +535,11 @@ int AudDrv_GPIO_EXTAMP_Select(int bEnable, int mode)
 			}
 		}
 	} else {
+#ifdef CONFIG_HQ_AUDIO_GPIO_EXTAMP_PA
+		if (desc) {
+			gpiod_set_raw_value(desc, 0);
+		}
+#endif
 		if (aud_gpios[GPIO_EXTAMP_LOW].gpio_prepare) {
 			retval = pinctrl_select_state(
 				pinctrlaud,
