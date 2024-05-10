@@ -253,3 +253,9 @@ config SND_SOC_MTK_AUDIO_DSP
 	  that can be used with other platforms
 	  Select Y if you have such device.
 	  If unsure select "N".
+
+config HQ_AUDIO_GPIO_EXTAMP_PA
+	bool "HQ AUDIO GPIO EXTAMP PA"
+	help
+	  Say Y here to enable GPIO control for the external amplifier.
+	  If unsure select "N".

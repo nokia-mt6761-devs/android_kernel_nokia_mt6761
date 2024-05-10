@@ -54,7 +54,7 @@
  *****************************************************************************/
 #include <linux/gpio.h>
 
-void AudDrv_GPIO_probe(void *dev);
+void AudDrv_GPIO_probe(struct device *dev);
 
 int AudDrv_GPIO_Request(bool _enable, enum soc_aud_digital_block _usage);
 
