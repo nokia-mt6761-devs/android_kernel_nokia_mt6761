@@ -443,3 +443,9 @@ config MTK_ULTRASND_PROXIMITY
 	  emulate physical proximity sensor. Using
 	  IPI interface to communicate with SCP side and
 	  be controlled by sensor hal.
+
+config HQ_AUDIO_GPIO_EXTAMP_PA
+	bool "HQ AUDIO GPIO EXTAMP PA"
+	help
+	  Say Y here to enable GPIO control for the external amplifier.
+	  If unsure select "N".
