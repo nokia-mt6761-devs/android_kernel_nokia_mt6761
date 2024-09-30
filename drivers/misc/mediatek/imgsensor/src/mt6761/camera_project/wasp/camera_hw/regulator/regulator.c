@@ -60,6 +60,7 @@ struct REGULATOR_CTRL regulator_control[REGULATOR_TYPE_MAX_NUM] = {
 	{"vcama"},
 	{"vcamd"},
 	{"vcamio"},
+	{"vcamaf"},
 };
 
 static struct REGULATOR reg_instance;
