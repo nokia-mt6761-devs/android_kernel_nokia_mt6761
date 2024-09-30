@@ -52,3 +52,12 @@ config IMGSENSOR_MAIN3
 	  This config is mainly mapping to userspace.
 	  Consider the numbers of sensors and usage on the phone.
 	  Compare the custom usage defined in user-custom folder.
+
+config HQ_CAMERA_MODULE_INFO
+	bool "Expose Huaqin camera module info to procfs"
+	depends on MTK_IMGSENSOR
+	help
+	 Say Y here to expose Huaqin camera module info to procfs.
+	 The node can be found at /proc/cameraModuleInfo.
+
+	 If unsure, say N.

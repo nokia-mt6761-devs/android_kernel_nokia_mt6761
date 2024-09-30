@@ -16,8 +16,10 @@
 char mtk_ccm_name[camera_info_size] = { 0 };
 char mtk_i2c_dump[camera_info_size] = { 0 };
 
-
-
+#ifdef CONFIG_HQ_CAMERA_MODULE_INFO
+#define  CAM_MODULE_INFO "cameraModuleInfo"
+char *cameraModuleInfo[4] = {NULL, NULL, NULL,NULL};
+#endif
 
 static int pdaf_type_info_read(struct seq_file *m, void *v)
 {
@@ -435,6 +437,23 @@ static int imgsensor_proc_status_open(struct inode *inode, struct file *file)
 	return single_open(file, imgsensor_proc_status_read, NULL);
 };
 
+#ifdef CONFIG_HQ_CAMERA_MODULE_INFO
+static ssize_t cameraModuleInfo_read
+	(struct file *file, char __user *page, size_t size, loff_t *ppos)
+{
+	char buf[150] = {0};
+	int rc = 0;
+	snprintf(buf, 150,
+		"rear camera:%s\nfront camera:%s\n",
+		cameraModuleInfo[0],
+		cameraModuleInfo[1]);
+
+	rc = simple_read_from_buffer(page, size, ppos, buf, strlen(buf));
+
+	return rc;
+}
+#endif
+
 static const struct file_operations fcamera_proc_fops_status = {
 	.owner = THIS_MODULE,
 	.open = imgsensor_proc_status_open,
@@ -483,7 +502,12 @@ static const struct file_operations fcamera_proc_fops_set_pdaf_type = {
 	.write = proc_SensorType_write
 };
 
-
+#ifdef CONFIG_HQ_CAMERA_MODULE_INFO
+static const struct file_operations cameraModuleInfo_fops = {
+    .owner = THIS_MODULE,
+    .read = cameraModuleInfo_read,
+};
+#endif
 
 enum IMGSENSOR_RETURN imgsensor_proc_init(void)
 {
@@ -499,6 +523,9 @@ enum IMGSENSOR_RETURN imgsensor_proc_init(void)
 
 	/* Camera information */
 	proc_create(PROC_CAMERA_INFO, 0664, NULL, &fcamera_proc_fops1);
+#ifdef CONFIG_HQ_CAMERA_MODULE_INFO
+    proc_create(CAM_MODULE_INFO, 0664, NULL, &cameraModuleInfo_fops);
+#endif
 
 	return IMGSENSOR_RETURN_SUCCESS;
 }

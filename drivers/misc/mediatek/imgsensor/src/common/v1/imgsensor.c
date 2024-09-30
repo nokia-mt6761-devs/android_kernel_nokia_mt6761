@@ -64,6 +64,10 @@ static void cam_temperature_report_wq_routine(struct work_struct *);
 
 #define FEATURE_CONTROL_MAX_DATA_SIZE 128000
 
+#ifdef CONFIG_HQ_CAMERA_MODULE_INFO
+extern char *cameraModuleInfo[4];
+#endif
+
 struct platform_device *gpimgsensor_hw_platform_device;
 struct device *gimgsensor_device;
 /* 81 is used for V4L driver */
@@ -591,6 +595,10 @@ int imgsensor_set_driver(struct IMGSENSOR_SENSOR *psensor)
 					    drv_idx,
 					    psensor_inst->psensor_name);
 
+#ifdef CONFIG_HQ_CAMERA_MODULE_INFO
+					if (psensor->inst.sensor_idx < 4)
+						cameraModuleInfo[psensor->inst.sensor_idx] = psensor_inst->psensor_name;
+#endif
 					ret = drv_idx;
 					break;
 				}
