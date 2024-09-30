@@ -7,7 +7,6 @@
 
 #include "regulator/regulator.h"
 #include "gpio/gpio.h"
-/*#include "mt6306/mt6306.h"*/
 #include "mclk/mclk.h"
 
 
@@ -18,7 +17,6 @@ enum IMGSENSOR_RETURN
 	(*hw_open[IMGSENSOR_HW_ID_MAX_NUM])(struct IMGSENSOR_HW_DEVICE **) = {
 	imgsensor_hw_regulator_open,
 	imgsensor_hw_gpio_open,
-	/*imgsensor_hw_mt6306_open,*/
 	imgsensor_hw_mclk_open
 };
 
