@@ -62,7 +62,7 @@ bool getPDAFCalDataFromFile(void)
 
    //fd = sys_open("/data/pdaf.txt", O_RDONLY, 777);
    //fd = sys_open("/sdcard/DCIM/pdaf.txt", O_RDONLY, 777);
-   fd = sys_open("/system/pdaf.txt", O_RDONLY, 777);
+   fd = ksys_open("/system/pdaf.txt", O_RDONLY, 777);
 
    if( fd < 0 )   
    {
@@ -72,7 +72,7 @@ bool getPDAFCalDataFromFile(void)
    else
    {
 //	 if( sys_read(fd, (char *)&hi1336_eeprom_data[0], 1372) )
- 	if( sys_read(fd, (char *)&hi1336_eeprom_data[0], 1404) )
+ 	if( ksys_read(fd, (char *)&hi1336_eeprom_data[0], 1404) )
      {
        LOG_INF("KYM PDAF FILE READ PASS\n");
        Flag = true;
@@ -80,7 +80,7 @@ bool getPDAFCalDataFromFile(void)
    }
 
 RESULT:
-    sys_close(fd);
+    ksys_close(fd);
     set_fs(old_fs);
     return Flag;
 }

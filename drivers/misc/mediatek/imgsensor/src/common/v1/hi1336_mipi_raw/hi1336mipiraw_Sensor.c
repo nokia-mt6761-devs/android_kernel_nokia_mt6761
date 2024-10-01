@@ -48,7 +48,7 @@ static DEFINE_SPINLOCK(imgsensor_drv_lock);
 static struct imgsensor_info_struct imgsensor_info = { 
 	.sensor_id = HI1336_SENSOR_ID,
 	
-	.checksum_value = 0xb7c53a42,       //0x6d01485c // Auto Test Mode ÃßÈÄ..
+	.checksum_value = 0xb7c53a42,       //0x6d01485c // Auto Test Mode ï¿½ï¿½ï¿½ï¿½..
 	.pre = {
 		.pclk = 600000000,				//record different mode's pclk
 		.linelength =  6004, 			//record different mode's linelength
@@ -3340,18 +3340,11 @@ write_cmos_sensor(0x027e, 0x0100); //tg enable
 
 #endif
 }
-extern int m_SensorSel; //xjl 20180615
 static kal_uint32 get_imgsensor_id(UINT32 *sensor_id)
 {
 	kal_uint8 i = 0;
 	kal_uint8 retry = 2;
 
-	if(m_SensorSel == 1) //xjl 20180615
- {
-		LOG_INF("Read id fail,sensor id: 0x%x\n", *sensor_id);
-		*sensor_id = 0xFFFFFFFF;
-		return ERROR_SENSOR_CONNECT_FAIL;
-	}
 	while (imgsensor_info.i2c_addr_table[i] != 0xff) {
 		spin_lock(&imgsensor_drv_lock);
 		imgsensor.i2c_write_id = imgsensor_info.i2c_addr_table[i];
@@ -3402,11 +3395,7 @@ static kal_uint32 open(void)
 	LOG_INF("[open]: PLATFORM:MT6761,MIPI 4LANE\n");
 	LOG_INF("preview 2104*1560@30fps,714Mbps/lane;"
 		"capture 4208*3120@30fps 1428Mbps/lane\n");
-	if(m_SensorSel == 1) //xjl 20180615
- {
-		LOG_INF("open sensor id fail: 0x%x\n", sensor_id);
-		return ERROR_SENSOR_CONNECT_FAIL;
-	}
+
 	while (imgsensor_info.i2c_addr_table[i] != 0xff) {
 		spin_lock(&imgsensor_drv_lock);
 		imgsensor.i2c_write_id = imgsensor_info.i2c_addr_table[i];
