@@ -38,9 +38,9 @@
 /*****************************************************************************
 * Private constant and macro definitions using #define
 *****************************************************************************/
-#define FTS_FW_REQUEST_SUPPORT                      1
+#define FTS_FW_REQUEST_SUPPORT                      0
 /* Example: focaltech_ts_fw_tianma.bin */
-#define FTS_FW_NAME_PREX_WITH_REQUEST               "focaltech_ts_fw_"
+#define FTS_FW_NAME_PREX_WITH_REQUEST               "focaltech_ts_fw"
 
 /*****************************************************************************
 * Global variable or extern global variabls/functions
@@ -53,14 +53,9 @@ u8 fw_file2[] = {
 #include FTS_UPGRADE_FW2_FILE
 };
 
-u8 fw_file3[] = {
-#include FTS_UPGRADE_FW3_FILE
-};
-
 struct upgrade_module module_list[] = {
-    {FTS_MODULE_ID, FTS_MODULE_NAME, fw_file, sizeof(fw_file)},
-    {FTS_MODULE2_ID, FTS_MODULE2_NAME, fw_file2, sizeof(fw_file2)},
-    {FTS_MODULE3_ID, FTS_MODULE3_NAME, fw_file3, sizeof(fw_file3)},
+    {fw_file, sizeof(fw_file)},
+    {fw_file2, sizeof(fw_file2)},
 };
 
 struct upgrade_func *upgrade_func_list[] = {
@@ -69,11 +64,33 @@ struct upgrade_func *upgrade_func_list[] = {
 
 struct fts_upgrade *fwupgrade;
 
+extern char mtkfb_lcm_name[];
+
 /*****************************************************************************
 * Static function prototypes
 *****************************************************************************/
 static bool fts_fwupg_check_state(
     struct fts_upgrade *upg, enum FW_STATUS rstate);
+
+static int fts_get_lcm_number(void)
+{
+    int lcm_number = 0;
+
+    if (strcmp(mtkfb_lcm_name, "JD9365_GUOXIAN") == 0) {
+        lcm_number = 1;
+    }
+    else if (strcmp(mtkfb_lcm_name, "JD9365_HELITAI") == 0) {
+        lcm_number = 2;
+    }
+    else if (strcmp(mtkfb_lcm_name, "ST7703_GUOXIAN") == 0) {
+        lcm_number = 3;
+    }
+    else if (strcmp(mtkfb_lcm_name, "ST7703_HELITAI") == 0) {
+        lcm_number = 4;
+    }
+
+    return lcm_number;
+}
 
 /************************************************************************
 * Name: fts_fwupg_get_boot_state
@@ -929,109 +946,6 @@ int fts_flash_write_buf(
     return ecc_in_host;
 }
 
-/************************************************************************
- * Name: fts_flash_read_buf
- * Brief: read data from flash
- * Input: saddr - start address data write to flash
- *        buf - buffer to store data read from flash
- *        len - read length
- * Output:
- * Return: return 0 if success, otherwise return error code
- *
- * Warning: can't call this function directly, need call in boot environment
- ***********************************************************************/
-static int fts_flash_read_buf(u32 saddr, u8 *buf, u32 len)
-{
-    int ret = 0;
-    u32 i = 0;
-    u32 packet_number = 0;
-    u32 packet_len = 0;
-    u32 addr = 0;
-    u32 offset = 0;
-    u32 remainder = 0;
-    u8 wbuf[FTS_CMD_READ_LEN] = { 0 };
-
-    if ((NULL == buf) || (0 == len)) {
-        FTS_ERROR("buf is NULL or len is 0");
-        return -EINVAL;
-    }
-
-    packet_number = len / FTS_FLASH_PACKET_LENGTH;
-    remainder = len % FTS_FLASH_PACKET_LENGTH;
-    if (remainder > 0) {
-        packet_number++;
-    }
-    packet_len = FTS_FLASH_PACKET_LENGTH;
-    FTS_INFO("read packet_number:%d, remainder:%d", packet_number, remainder);
-
-    wbuf[0] = FTS_CMD_READ;
-    for (i = 0; i < packet_number; i++) {
-        offset = i * FTS_FLASH_PACKET_LENGTH;
-        addr = saddr + offset;
-        wbuf[1] = BYTE_OFF_16(addr);
-        wbuf[2] = BYTE_OFF_8(addr);
-        wbuf[3] = BYTE_OFF_0(addr);
-
-        /* last packet */
-        if ((i == (packet_number - 1)) && remainder)
-            packet_len = remainder;
-
-        ret = fts_write(wbuf, FTS_CMD_READ_LEN);
-        if (ret < 0) {
-            FTS_ERROR("pram/bootloader write 03 command fail");
-            return ret;
-        }
-
-        msleep(FTS_CMD_READ_DELAY); /* must wait, otherwise read wrong data */
-        ret = fts_read(NULL, 0, buf + offset, packet_len);
-        if (ret < 0) {
-            FTS_ERROR("pram/bootloader read 03 command fail");
-            return ret;
-        }
-    }
-
-    return 0;
-}
-
-/************************************************************************
- * Name: fts_flash_read
- * Brief:
- * Input:  addr  - address of flash
- *         len   - length of read
- * Output: buf   - data read from flash
- * Return: return 0 if success, otherwise return error code
- ***********************************************************************/
-static int fts_flash_read(u32 addr, u8 *buf, u32 len)
-{
-    int ret = 0;
-
-    FTS_INFO("***********read flash***********");
-    if ((NULL == buf) || (0 == len)) {
-        FTS_ERROR("buf is NULL or len is 0");
-        return -EINVAL;
-    }
-
-    ret = fts_fwupg_enter_into_boot();
-    if (ret < 0) {
-        FTS_ERROR("enter into pramboot/bootloader fail");
-        goto read_flash_err;
-    }
-
-    ret = fts_flash_read_buf(addr, buf, len);
-    if (ret < 0) {
-        FTS_ERROR("read flash fail");
-        goto read_flash_err;
-    }
-
-read_flash_err:
-    /* reset to normal boot */
-    ret = fts_fwupg_reset_in_boot();
-    if (ret < 0) {
-        FTS_ERROR("reset to normal boot fail");
-    }
-    return ret;
-}
-
 static int fts_read_file(char *file_name, u8 **file_buf)
 {
     int ret = 0;
@@ -1695,76 +1609,19 @@ static void fts_fwupg_auto_upgrade(struct fts_upgrade *upg)
     FTS_INFO("********************FTS exit upgrade********************");
 }
 
-static int fts_fwupg_get_vendorid(struct fts_upgrade *upg, int *vid)
-{
-    int ret = 0;
-    bool fwvalid = false;
-    u8 vendor_id = 0;
-    u8 module_id = 0;
-    u32 fwcfg_addr = 0;
-    u8 cfgbuf[FTS_HEADER_LEN] = { 0 };
-
-    FTS_INFO("read vendor id from tp");
-    if ((!upg) || (!upg->func) || (!upg->ts_data) || (!vid)) {
-        FTS_ERROR("upgrade/func/ts_data/vid is null");
-        return -EINVAL;
-    }
-
-    fwvalid = fts_fwupg_check_fw_valid();
-    if (fwvalid) {
-        ret = fts_read_reg(FTS_REG_VENDOR_ID, &vendor_id);
-        if (upg->ts_data->ic_info.is_incell)
-            ret = fts_read_reg(FTS_REG_MODULE_ID, &module_id);
-    } else {
-        fwcfg_addr =  upg->func->fwcfgoff;
-        ret = fts_flash_read(fwcfg_addr, cfgbuf, FTS_HEADER_LEN);
-        vendor_id = cfgbuf[FTS_CONIFG_VENDORID_OFF];
-        if (upg->ts_data->ic_info.is_incell) {
-            if ((cfgbuf[FTS_CONIFG_MODULEID_OFF] +
-                 cfgbuf[FTS_CONIFG_MODULEID_OFF + 1]) == 0xFF)
-                module_id = cfgbuf[FTS_CONIFG_MODULEID_OFF];
-        }
-    }
-
-    if (ret < 0) {
-        FTS_ERROR("fail to get vendor id from tp");
-        return ret;
-    }
-
-    *vid = (int)((module_id << 8) + vendor_id);
-    return 0;
-}
-
 static int fts_fwupg_get_module_info(struct fts_upgrade *upg)
 {
-    int ret = 0;
-    int i = 0;
-    struct upgrade_module *info = &module_list[0];
+    struct upgrade_module *info = &module_list[1];
 
     if (!upg || !upg->ts_data) {
         FTS_ERROR("upg/ts_data is null");
         return -EINVAL;
     }
 
-    if (FTS_GET_MODULE_NUM > 1) {
-        /* support multi modules, must read correct module id(vendor id) */
-        ret = fts_fwupg_get_vendorid(upg, &upg->module_id);
-        if (ret < 0) {
-            FTS_ERROR("get vendor id failed");
-            return ret;
-        }
-        FTS_INFO("module id:%04x", upg->module_id);
-        for (i = 0; i < FTS_GET_MODULE_NUM; i++) {
-            info = &module_list[i];
-            if (upg->module_id == info->id) {
-                FTS_INFO("module id match, get module info pass");
-                break;
-            }
-        }
-        if (i >= FTS_GET_MODULE_NUM) {
-            FTS_ERROR("no module id match, don't get file");
-            return -ENODATA;
-        }
+    upg->module_id = fts_get_lcm_number();
+    FTS_INFO("lcm id:%d", upg->module_id);
+    if (upg->module_id != 3) {
+        info = &module_list[0];
     }
 
     upg->module_info = info;
@@ -1783,9 +1640,8 @@ static int fts_get_fw_file_via_request_firmware(struct fts_upgrade *upg)
         return -EINVAL;
     }
 
-    snprintf(fwname, FILE_NAME_LENGTH, "%s%s.bin", \
-             FTS_FW_NAME_PREX_WITH_REQUEST, \
-             upg->module_info->vendor_name);
+    snprintf(fwname, FILE_NAME_LENGTH, "%s.bin", \
+             FTS_FW_NAME_PREX_WITH_REQUEST);
 
     ret = request_firmware(&fw, fwname, upg->ts_data->dev);
     if (0 == ret) {
