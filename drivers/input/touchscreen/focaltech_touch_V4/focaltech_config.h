@@ -137,7 +137,7 @@
 /*
  * choose your ic chip type of focaltech
  */
-#define FTS_CHIP_TYPE   _FT5446_P03
+#define FTS_CHIP_TYPE   _FT5446
 
 /******************* Enables *********************/
 /*********** 1 to enable, 0 to disable ***********/
