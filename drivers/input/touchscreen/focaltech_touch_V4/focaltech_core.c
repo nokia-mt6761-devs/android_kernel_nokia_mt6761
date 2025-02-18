@@ -1347,8 +1347,7 @@ static const struct i2c_device_id fts_ts_id[] = {
     {},
 };
 static const struct of_device_id fts_dt_match[] = {
-    {.compatible = "mediatek,cap_touch"},
-	{.compatible = "focaltech,ft3327"},
+    {.compatible = "mediatek,cap_touch_focal"},
     {},
 };
 MODULE_DEVICE_TABLE(of, fts_dt_match);
