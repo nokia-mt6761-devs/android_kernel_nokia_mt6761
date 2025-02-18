@@ -67,13 +67,6 @@ static int fts_ft5422u_upgrade(u8 *buf, u32 len)
         return -EINVAL;
     }
 
-	ret = fts_ft5452_flag(buf);
-	if(!ret)
-	{
-		FTS_ERROR("ICtype and APP.bin not match");
-		return -EINVAL;
-	}
-
     if (memcmp((char *)buf, "APPIDX", 6)) {
         FTS_ERROR("fw buffer signature is not match IC(5422U), no upgrade");
         return -EINVAL;
