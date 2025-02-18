@@ -33,11 +33,7 @@
 * 1.Included header files
 *****************************************************************************/
 #include "focaltech_core.h"
-#if defined(CONFIG_PRIZE_HARDWARE_INFO)
-#include "../../../../misc/mediatek/hardware_info/hardware_info.h"
 
-extern struct hardware_info current_tp_info;
-#endif
 /*****************************************************************************
 * 2.Private constant and macro definitions using #define
 *****************************************************************************/
@@ -99,73 +95,7 @@ static int fts_ex_mode_switch(enum _ex_mode mode, u8 value)
 
     return ret;
 }
-#if defined(CONFIG_PRIZE_SMART_COVER_COMMON_NODE)
-static ssize_t fts_touch_glove_show(
-    struct device *dev, struct device_attribute *attr, char *buf)
-{
-    int count = 0;
-    u8 val = 0;
-    struct fts_ts_data *ts_data = fts_data;
-    struct input_dev *input_dev = ts_data->input_dev;
 
-    mutex_lock(&input_dev->mutex);
-    fts_read_reg(FTS_REG_GLOVE_MODE_EN, &val);
-    count = snprintf(buf + count, PAGE_SIZE, "Glove Mode:%s\n",
-                     ts_data->glove_mode ? "On" : "Off");
-    count += snprintf(buf + count, PAGE_SIZE, "Glove Reg(0xC0):%d\n", val);
-    mutex_unlock(&input_dev->mutex);
-
-    return count;
-}
-
-static ssize_t fts_touch_glove_store(
-    struct device *dev,
-    struct device_attribute *attr, const char *buf, size_t count)
-{
-    int ret = 0;
-    struct fts_ts_data *ts_data = fts_data;
-
-    if (FTS_SYSFS_ECHO_ON(buf)) {
-        if (!ts_data->glove_mode) {
-            FTS_DEBUG("enter glove mode");
-            ret = fts_ex_mode_switch(MODE_GLOVE, ENABLE);
-            if (ret >= 0) {
-                ts_data->glove_mode = ENABLE;
-            }
-        }
-    } else if (FTS_SYSFS_ECHO_OFF(buf)) {
-        if (ts_data->glove_mode) {
-            FTS_DEBUG("exit glove mode");
-            ret = fts_ex_mode_switch(MODE_GLOVE, DISABLE);
-            if (ret >= 0) {
-                ts_data->glove_mode = DISABLE;
-            }
-        }
-    }
-
-    FTS_DEBUG("glove mode:%d", ts_data->glove_mode);
-	#if defined(CONFIG_PRIZE_HARDWARE_INFO)
-	memset(current_tp_info.more,0,sizeof(current_tp_info.more));
-	sprintf(current_tp_info.more,"Glove Mode:%s", ts_data->glove_mode ? "On" : "Off");
-	#endif
-    printk("[Mode]glove mode status:  %d", ts_data->glove_mode);
-    return count;
-}
-static DEVICE_ATTR(state,0664, fts_touch_glove_show, fts_touch_glove_store);
-
-
-/*****************************************************************************
-* 4.Static variables
-*****************************************************************************/
-
-/*****************************************************************************
-* 5.Global variable or extern global variabls/functions
-*****************************************************************************/
-
-/*****************************************************************************
-* 6.Static function prototypes
-*******************************************************************************/
-#else
 static ssize_t fts_glove_mode_show(
     struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -214,7 +144,6 @@ static ssize_t fts_glove_mode_store(
 }
 static DEVICE_ATTR(fts_glove_mode, S_IRUGO | S_IWUSR,
                    fts_glove_mode_show, fts_glove_mode_store);
-#endif
 
 static ssize_t fts_cover_mode_show(
     struct device *dev, struct device_attribute *attr, char *buf)
@@ -324,9 +253,7 @@ static DEVICE_ATTR(fts_charger_mode, S_IRUGO | S_IWUSR,
                    fts_charger_mode_show, fts_charger_mode_store);
 
 static struct attribute *fts_touch_mode_attrs[] = {
-	#if !defined(CONFIG_PRIZE_SMART_COVER_COMMON_NODE)
     &dev_attr_fts_glove_mode.attr,
-	#endif
     &dev_attr_fts_cover_mode.attr,
     &dev_attr_fts_charger_mode.attr,
     NULL,
@@ -355,34 +282,6 @@ int fts_ex_mode_recovery(struct fts_ts_data *ts_data)
 
 int fts_ex_mode_init(struct fts_ts_data *ts_data)
 {
-		#if defined(CONFIG_PRIZE_SMART_COVER_COMMON_NODE)  
-		static struct kobject *sysfs_rootdir = NULL; 
-		struct kobject *prize_glove = NULL;
-		int err = 0;
-		
-		ts_data->glove_mode = DISABLE;
-        ts_data->cover_mode = DISABLE;
-        ts_data->charger_mode = DISABLE;
-		
-
-		if (!sysfs_rootdir) {
-			// this kobject is shared between modules, do not free it when error occur
-			sysfs_rootdir = kobject_create_and_add("prize", kernel_kobj);
-		}
-
-		if (!prize_glove){
-			prize_glove = kobject_create_and_add("smartcover", sysfs_rootdir);
-		}
-		err = sysfs_create_link(prize_glove,&ts_data->dev->kobj,"common_node");
-		if (err){
-			printk("prize fts sysfs_create_link fail\n");
-		}
-		if(sysfs_create_file(&ts_data->dev->kobj, &dev_attr_state.attr))
-		{
-			return -1;
-		}
-			return 0;
-	#else
     int ret = 0;
 
     ts_data->glove_mode = DISABLE;
@@ -399,7 +298,6 @@ int fts_ex_mode_init(struct fts_ts_data *ts_data)
     }
 
     return 0;
-	#endif
 }
 
 int fts_ex_mode_exit(struct fts_ts_data *ts_data)

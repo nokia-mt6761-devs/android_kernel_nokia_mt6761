@@ -48,11 +48,6 @@
 #include "focaltech_core.h"
 #include "tpd.h"
 
-#if defined(CONFIG_PRIZE_HARDWARE_INFO)
-#include "../../../../misc/mediatek/hardware_info/hardware_info.h"
-
-extern struct hardware_info current_tp_info;
-#endif
 /*****************************************************************************
 * Private constant and macro definitions using #define
 *****************************************************************************/
@@ -278,10 +273,7 @@ static int fts_read_bootid(struct fts_ts_data *ts_data, u8 *id)
 
     id[0] = chip_id[0];
     id[1] = chip_id[1];
-#if defined(CONFIG_PRIZE_HARDWARE_INFO)
-    sprintf(current_tp_info.id,"boot_id:0x%02x%02x",chip_id[0], chip_id[1]);
-    //strcpy(current_tp_info.vendor,"Focaltech");
-#endif
+
     return 0;
 }
 
@@ -1084,7 +1076,6 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
     int ret = 0;
     int pdata_size = sizeof(struct fts_ts_platform_data);
     u8 chipID1,chipID2;
-	u8 ctp_fw_version;
     
 	
     FTS_FUNC_ENTER();
@@ -1204,13 +1195,7 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 	fts_read_reg(FTS_REG_CHIP_ID2, &chipID2);
 
 	printk("%s,id1=0x%02x,id2=0x%02x\n", __func__,chipID1,chipID2);
-#if defined(CONFIG_PRIZE_HARDWARE_INFO)
-    fts_read_reg(0xA6, &ctp_fw_version);
-	sprintf(current_tp_info.chip,"Focaltech_FW:0x%02x\n chip_id:0x%02x%02x",ctp_fw_version,chipID1,chipID2);
-     	
-    strcpy(current_tp_info.vendor,"");
-    sprintf(current_tp_info.more,"%d*%d",1600,720);
-#endif
+
     tpd_load_status = 1;
     FTS_DEBUG("TPD_RES_Y:%d", (int)TPD_RES_Y);
     FTS_FUNC_EXIT();

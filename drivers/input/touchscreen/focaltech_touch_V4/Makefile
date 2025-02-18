@@ -8,9 +8,7 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/$(MTK_PLATFORM)/
 ccflags-y += -I$(srctree)/drivers/base
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/hwmon/include
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/alsps/inc/
-#prize-chj-20181227 for tp esd Residual point problem start
-ccflags-y += -I$(srctree)/drivers/misc/mediatek/lcm/inc/
-#prize-chj-20181227 for tp esd Residual point problem end
+
 obj-y	+=  focaltech_core.o
 obj-y	+=  focaltech_ex_fun.o
 obj-y	+=  focaltech_ex_mode.o
